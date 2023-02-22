@@ -1,0 +1,61 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://example.com/schemas/config.json",
+  "type": "object",
+  "properties": {
+    "autoResponse": {
+      "title": "Auto response",
+      "description": "A list of auto responses, reactions and their triggers",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "phrases": {
+            "title": "List of phrases",
+            "description": "A list of phrases that should trigger the response",
+            "type": "array",
+            "items": {
+              "title": "Phrase",
+              "description": "A phrase that should trigger the response",
+              "type": "string"
+            }
+          },
+          "responses": {
+            "title": "List of responses",
+            "description": "A list of responses that should be sent",
+            "type": "array",
+            "items": {
+              "title": "Response",
+              "description": "A response that should be sent",
+              "type": "string"
+            }
+          },
+          "reaction": {
+            "title": "Reaction",
+            "description": "A reaction that should be added to the message",
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": ["phrases"]
+      }
+    },
+    "status": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "title": "Status type",
+          "description": "The type of status to display",
+          "type": "string",
+          "enum": ["playing", "streaming", "listening", "watching", "competing"]
+        },
+        "message": {
+          "title": "Status message",
+          "description": "The message to display",
+          "type": "string"
+        }
+      }
+    }
+  },
+  "required": []
+}
