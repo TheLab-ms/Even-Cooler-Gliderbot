@@ -1,6 +1,6 @@
-# Glider Bot
+# [WIP] Glider Bot
 
-The offical Discord Bot for TheLab.ms 
+The un-offical Discord Bot for TheLab.ms 
 
 ## Setup
 
