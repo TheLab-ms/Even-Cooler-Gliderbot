@@ -11,6 +11,7 @@ import loadJobs from './helpers/loadJobs';
 import EventData from './interfaces/EventData.interface';
 import configSchema from './schemas/config';
 
+
 dotenv.config();
 const { DISCORD_TOKEN } = process.env;
 

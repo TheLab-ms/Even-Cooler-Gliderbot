@@ -5,9 +5,7 @@ const Job: CronJob = {
   name: 'test',
   onInit: true,
   cron: '*/30 */5 * * * *',
-  run: async (bot: Client) => {
-    console.log('Application', bot.application.id, 'says hello!');
-  },
+  run: async (bot: Client) => {},
 };
 
 export default Job;

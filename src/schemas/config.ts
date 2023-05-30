@@ -11,9 +11,20 @@ const statusSchema = z.object({
   message: z.string(),
 });
 
+const printerSchema = z.object({
+  name: z.string(),
+  address: z.string().url(),
+  apiKey: z.string(),
+  hasWebcam: z.boolean().default(true).optional(),
+  make: z.string().optional(),
+  model: z.string().optional(),
+  color: z.string().optional(),
+});
+
 const configSchema = z.object({
-  autoResponse: z.array(autoResponseSchema),
-  status: statusSchema,
+  autoResponse: z.array(autoResponseSchema).optional(),
+  status: statusSchema.optional().default({ type: 'watching', message: 'you' }),
+  printers: z.array(printerSchema).optional().default([]),
 });
 
 export default configSchema;
