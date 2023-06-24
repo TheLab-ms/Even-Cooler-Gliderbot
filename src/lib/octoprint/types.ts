@@ -29,14 +29,7 @@ export interface PrinterStateFlags {
 export interface PrinterState {
   error: string;
   flags: PrinterStateFlags;
-  text:
-    | 'Operational'
-    | 'Printing from SD'
-    | 'Offline'
-    | 'Connecting'
-    | 'Closed'
-    | 'Error'
-    | 'Unknown';
+  text: 'Operational' | 'Printing' | 'Offline' | 'Connecting' | 'Closed' | 'Error' | 'Unknown';
 }
 
 export interface PrinterTemperature {
