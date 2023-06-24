@@ -4,6 +4,7 @@ import path from 'path';
 import axios from 'axios';
 import { JobState, OctoprintConfig, PrinterStatus } from './types';
 import { OctoprintError } from './errors';
+import { debugLog } from '../../utils/debug';
 export class Octoprint {
   private url: string;
   private apiKey: string;
@@ -63,6 +64,7 @@ export class Octoprint {
       });
     } catch (error) {
       if (axios.isAxiosError(error)) {
+        debugLog(error);
         throw new OctoprintError(
           error.status ?? 500,
           error.response?.data?.error ?? 'Unknown error',
