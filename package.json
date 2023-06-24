@@ -4,6 +4,7 @@
   "description": "The un-offical Discord Bot for TheLab.ms",
   "main": "index.js",
   "scripts": {
+    "build": "tsc",
     "start": "ts-node --transpile-only src/index.ts",
     "lint": "eslint . --ext .ts --config .eslintrc",
     "config": "node ./scripts/config.js"
