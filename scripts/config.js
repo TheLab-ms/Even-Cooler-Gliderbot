@@ -19,7 +19,8 @@ if (!fs.existsSync(path.join(process.cwd(), 'config.json'))) {
 const config = require('../config.json');
 const envFilePath = path.join(process.cwd(), '.env');
 // Take config Stringify it and base64 encode it
-const configString = JSON.stringify(config);
+
+const configBase64 = Buffer.from(JSON.stringify(config)).toString('base64');
 
 const variableName = 'CONFIG';
 
@@ -33,7 +34,7 @@ fs.readFile(envFilePath, 'utf8', (err, data) => {
   // Update the value of the variable or add it if it doesn't exist
   const updatedData = data.replace(
     new RegExp(`${variableName}=(.*)`),
-    `${variableName}="${configString}"`,
+    `${variableName}="${configBase64}"`,
   );
 
   // Write the updated content back to the .env file
