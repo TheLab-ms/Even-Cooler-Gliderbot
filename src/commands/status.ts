@@ -1,7 +1,15 @@
-import { AttachmentBuilder, AttachmentData, CommandInteraction, EmbedBuilder } from 'discord.js';
+import {
+  AttachmentBuilder,
+  AttachmentData,
+  ButtonBuilder,
+  ButtonStyle,
+  CommandInteraction,
+  EmbedBuilder,
+} from 'discord.js';
 import { Command } from '../lib/command';
 import printers from '../utils/printers';
 import { OctoprintError } from '../lib/octoprint/errors';
+import { ActionRowBuilder } from '@discordjs/builders';
 
 export class Status extends Command {
   title = 'status';
@@ -20,12 +28,17 @@ export class Status extends Command {
     },
   ];
   async run(interaction: CommandInteraction) {
-    if (!interaction.options || !interaction.options.get('printer') || interaction.options.get('printer') === null) {
+    if (
+      !interaction.options ||
+      !interaction.options.get('printer') ||
+      interaction.options.get('printer') === null
+    ) {
       return;
     }
     const option = interaction.options.get('printer');
     const printerIndex = option?.value as string;
     const printer = printers[printerIndex];
+
     try {
       const [printerState, jobState, snapshotBuffer] = await Promise.all([
         printer.getPrinterState(),
@@ -45,11 +58,6 @@ export class Status extends Command {
             value: printerState.state.text,
             inline: true,
           },
-          {
-            name: 'Job State',
-            value: jobState.state,
-            inline: true,
-          },
         ])
         .setTimestamp();
 
@@ -65,14 +73,53 @@ export class Status extends Command {
           },
         ]);
       }
+
+      if (printerState.state.text === 'Printing') {
+        const jobEndingTimestamp = (
+          (Date.now() + jobState.progress.printTimeLeft * 1000) /
+          1000
+        ).toFixed(0);
+        embed.addFields([
+          {
+            name: 'Job Name',
+            value: jobState.job.file.name,
+            inline: true,
+          },
+          {
+            name: 'Job Progress',
+            value: `${jobState.progress.completion.toFixed(2)}%`,
+            inline: true,
+          },
+          {
+            name: 'Estimated Time Remaining',
+            value: `<t:${jobEndingTimestamp}:R>`,
+          },
+        ]);
+      }
+
+      // const confirm = new ButtonBuilder()
+      //   .setCustomId('confirm')
+      //   .setLabel('Confirm Ban')
+      //   .setStyle(ButtonStyle.Danger);
+
+      // const cancel = new ButtonBuilder()
+      //   .setCustomId('cancel')
+      //   .setLabel('Cancel')
+      //   .setStyle(ButtonStyle.Secondary);
+
+      // const row = new ActionRowBuilder<ButtonBuilder>().addComponents(cancel, confirm);
+
       await interaction.editReply({
         embeds: [embed],
         files: embedFiles,
+        // components: [row],
       });
     } catch (error) {
       if (error instanceof OctoprintError) {
         await interaction.editReply(`Error: ${error.message}`);
+        return;
       }
+      await interaction.editReply(`An unknown error occurred`);
     }
   }
 }
