@@ -7,5 +7,7 @@ declare namespace NodeJS {
     WHMCS_SECRET: string;
     WHMCS_API_URL: string;
     CONFLUENCE_URL: string;
+    CHANNEL_ID: string;
+    CONFIG: string;
   }
 }

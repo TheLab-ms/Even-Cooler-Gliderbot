@@ -1,0 +1,18 @@
+{
+  "autoResponse": [
+    {
+      "phrases": ["good bot"],
+      "reaction": "❤️"
+    },
+    {
+      "phrases": ["secret word"],
+      "responses": ["secret response"]
+    }
+  ],
+  "status": {
+    "type": "playing",
+    "message": "games"
+  },
+  "printers": [
+  ]
+}
