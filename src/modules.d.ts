@@ -3,11 +3,15 @@ declare namespace NodeJS {
     DISCORD_TOKEN: string;
     CLIENT_ID: string;
     GUILD_ID: string;
-    WHMCS_ID: string;
-    WHMCS_SECRET: string;
-    WHMCS_API_URL: string;
-    CONFLUENCE_URL: string;
-    CHANNEL_ID: string;
     CONFIG: string;
+    KEYCLOAK_URL: string;
+    KEYCLOAK_REALM: string;
+    KEYCLOAK_USER: string;
+    KEYCLOAK_PASSWORD: string;
+    KEYCLOAK_LEADERSHIP_GROUP: string;
+    KEYCLOAK_MEMBERSHIP_GROUP: string;
+    DISCORD_MEMBERSHIP_ROLE: string;
+    DISCORD_LEADERSHIP_ROLE: string;
+    [key: string]: never;
   }
 }
