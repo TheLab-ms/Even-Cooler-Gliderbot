@@ -33,6 +33,7 @@ const configSchema = z.object({
     .default({ type: 'watching', message: 'you' })
     .describe('The bot status message.'),
   printers: z.array(printerSchema).optional().default([]).describe('List of printers.'),
+  forceKeycloakName: z.boolean().default(false),
 });
 
 export default configSchema;
