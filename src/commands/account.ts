@@ -1,7 +1,7 @@
 import { CommandInteraction } from 'discord.js';
-import { Command } from '../lib/command';
 import { Keycloak } from '../lib/keycloak';
 import { giveMemberRole } from '../utils/discord';
+import { Command } from '../interfaces/Commands';
 
 export class Account extends Command {
   title = 'account';
