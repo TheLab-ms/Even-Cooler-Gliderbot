@@ -1,78 +1,72 @@
 import { CommandInteraction } from 'discord.js';
 
-import { Keycloak } from '../../lib/keycloak';
-import { giveMemberRole } from '../../utils/discord';
+import { giveMemberNickName, giveMemberRoleViaInteraction } from '../../utils/discord';
 import { Command } from '../../interfaces/Commands';
+import EventData from '../../interfaces/EventData.interface';
 
 export class Account extends Command {
   title = 'account';
   description = 'Sync your membership status';
   isEphemeral = true;
   options = [];
-  async run(interaction: CommandInteraction) {
-    const client = new Keycloak({
-      url: process.env.KEYCLOAK_URL || '',
-      realm: process.env.KEYCLOAK_REALM || '',
-      user: process.env.KEYCLOAK_USER || '',
-      password: process.env.KEYCLOAK_PASSWORD || '',
-    });
-
-    try {
-      // Check if user is found in Members role
-      const members = (await client.getGroupMembers(process.env.KEYCLOAK_MEMBERSHIP_GROUP)).filter(
-        (member) => {
-          return member.attributes?.discordId && member.attributes?.discordId[0];
-        },
-      );
-      const member = members.find((member) => {
-        if (member.attributes?.discordId && member.attributes?.discordId[0]) {
-          return member.attributes?.discordId[0] === interaction.user.id;
-        }
-      });
-      if (!member) {
-        await interaction.editReply({
-          content: `You are not a member of TheLab`,
-        });
-        return;
-      }
-
-      // Update user roles
-      const [success, errMessage] = await giveMemberRole(
-        interaction,
-        process.env.DISCORD_MEMBERSHIP_ROLE || '',
-      );
-      if (!success) {
-        await interaction.editReply({
-          content: `An error occured: ${errMessage}`,
-        });
-        return;
-      }
+  async run(interaction: CommandInteraction, data: EventData) {
+    const { keycloakClient } = data;
+    const member = await keycloakClient.lookupDiscordUserInGroup(
+      interaction.user.id,
+      process.env.KEYCLOAK_MEMBERSHIP_GROUP,
+    );
+    if (!member) {
       await interaction.editReply({
-        content: `You are a member of TheLab, updating your roles`,
+        content: 'You are not a member of TheLab.ms',
       });
-
-      // Check if user is Leadership
-      const leadership = (
-        await client.getGroupMembers(process.env.KEYCLOAK_LEADERSHIP_GROUP)
-      ).filter((member) => {
-        return member.attributes?.discordId && member.attributes?.discordId[0];
-      });
-
-      const isLeadership = leadership.some((member) => {
-        if (member.attributes?.discordId && member.attributes?.discordId[0]) {
-          return member.attributes?.discordId[0] === interaction.user.id;
-        }
-      });
-
-      if (!isLeadership) {
-        return;
-      }
-      await giveMemberRole(interaction, process.env.DISCORD_LEADERSHIP_ROLE);
-    } catch (error) {
-      console.error(error);
-      await interaction.editReply({
-        content: `An error occured`,
-      });
+      return;
     }
+    const [addedMemberRole] = await giveMemberRoleViaInteraction(
+      interaction,
+      process.env.DISCORD_MEMBERSHIP_ROLE,
+    );
+    try {
+      if (data.config.forceKeycloakName) {
+        const newNickName = `${member.firstName} ${member.lastName}`;
+        giveMemberNickName(
+          interaction.client,
+          interaction.user.id,
+          interaction.guild?.id || '',
+          newNickName,
+        );
+      }
+    } catch (error) {
+      console.error('Failed to set nickname for user');
+    }
+    if (!addedMemberRole) {
+      await interaction.editReply({
+        content: 'An error occurred while adding your membership role. Please contact an admin.',
+      });
+      return;
+    }
+
+    const leadership = await keycloakClient.lookupDiscordUserInGroup(
+      interaction.user.id,
+      process.env.KEYCLOAK_LEADERSHIP_GROUP,
+    );
+    if (!leadership) {
+      await interaction.editReply({
+        content: 'You have been verified as a member of TheLab.ms. Welcome!',
+      });
+      return;
+    }
+    const [addedLeadershipRole] = await giveMemberRoleViaInteraction(
+      interaction,
+      process.env.DISCORD_LEADERSHIP_ROLE,
+    );
+    if (!addedLeadershipRole) {
+      await interaction.editReply({
+        content: 'An error occurred while adding your leadership role. Please contact an admin.',
+      });
+      return;
+    }
+    await interaction.editReply({
+      content: 'You have been verified as a member and leadership of TheLab.ms. Welcome!',
+    });
   }
 }

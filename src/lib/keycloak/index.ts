@@ -1,6 +1,6 @@
 import axios, { AxiosResponse } from 'axios';
 import qs from 'qs';
-import { KeyCloakConfig, KeyCloakTokenResponse, KeycloakUser } from './types';
+import { KeyCloakConfig, KeyCloakTokenResponse, KeycloakUser, KeycloakUserResponse } from './types';
 
 export class Keycloak {
   private url: string;
@@ -50,17 +50,55 @@ export class Keycloak {
     return response.data.access_token;
   }
 
-  getUsers(): Promise<KeycloakUser[]> {
-    return this.makeRequest<KeycloakUser[]>({
+  getUsers(): Promise<KeycloakUserResponse[]> {
+    return this.makeRequest<KeycloakUserResponse[]>({
       method: 'get',
       path: `users`,
     });
   }
 
-  getGroupMembers(groupId: string): Promise<KeycloakUser[]> {
-    return this.makeRequest<KeycloakUser[]>({
+  async getGroupMembers(groupId: string): Promise<KeycloakUser[]> {
+    const members = await this.makeRequest<KeycloakUserResponse[]>({
       method: 'get',
       path: `groups/${groupId}/members`,
     });
+    const cleanedMembers = members
+      .map((member: KeycloakUserResponse) => {
+        return {
+          id: member.id,
+          createdTimestamp: member.createdTimestamp,
+          username: member.username,
+          enabled: member.enabled,
+          totp: member.totp,
+          emailVerified: member.emailVerified,
+          firstName: member.firstName,
+          lastName: member.lastName,
+          email: member.email,
+          discordId:
+            member.attributes && member.attributes.discordId && member.attributes.discordId[0]
+              ? member.attributes.discordId[0]
+              : undefined,
+          activeSubscriber:
+            member.attributes &&
+            member.attributes.activeSubscriber &&
+            member.attributes.activeSubscriber[0]
+              ? member.attributes.activeSubscriber[0]
+              : undefined,
+          disableableCredentialTypes: member.disableableCredentialTypes,
+          requiredActions: member.requiredActions,
+          notBefore: member.notBefore,
+        };
+      })
+      .filter((member) => member.discordId);
+    return cleanedMembers;
+  }
+
+  async lookupDiscordUserInGroup(
+    discordId: string,
+    groupId: string,
+  ): Promise<KeycloakUser | undefined> {
+    const keycloakMembers = await this.getGroupMembers(groupId);
+    // Lookup discordId in keycloakMembers
+    return keycloakMembers.find((member) => member.discordId === discordId);
   }
 }
