@@ -1,61 +1,116 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://example.com/schemas/config.json",
+  "$id": "https://thelab.ms/schema/config.json",
+  "title": "TheLab.ms Config Schema",
+  "description": "TheLab.ms Config Schema",
   "type": "object",
   "properties": {
     "autoResponse": {
-      "title": "Auto response",
-      "description": "A list of auto responses, reactions and their triggers",
       "type": "array",
       "items": {
         "type": "object",
         "properties": {
           "phrases": {
-            "title": "List of phrases",
-            "description": "A list of phrases that should trigger the response",
             "type": "array",
             "items": {
-              "title": "Phrase",
-              "description": "A phrase that should trigger the response",
               "type": "string"
-            }
+            },
+            "description": "List of phrases that will trigger the bot's response."
           },
           "responses": {
-            "title": "List of responses",
-            "description": "A list of responses that should be sent",
             "type": "array",
             "items": {
-              "title": "Response",
-              "description": "A response that should be sent",
               "type": "string"
-            }
+            },
+            "description": "List of responses that the bot will randomly choose from."
           },
           "reaction": {
-            "title": "Reaction",
-            "description": "A reaction that should be added to the message",
             "type": "string",
-            "minLength": 1
+            "description": "Emoji that the bot will react with."
           }
         },
-        "required": ["phrases"]
-      }
+        "required": [
+          "phrases"
+        ],
+        "additionalProperties": false
+      },
+      "description": "List of auto responses."
     },
     "status": {
       "type": "object",
       "properties": {
         "type": {
-          "title": "Status type",
-          "description": "The type of status to display",
           "type": "string",
-          "enum": ["playing", "streaming", "listening", "watching", "competing"]
+          "enum": [
+            "playing",
+            "streaming",
+            "listening",
+            "watching",
+            "competing"
+          ],
+          "description": "The bot's status type."
         },
         "message": {
-          "title": "Status message",
-          "description": "The message to display",
-          "type": "string"
+          "type": "string",
+          "description": "The bot's status message."
         }
-      }
+      },
+      "required": [
+        "type",
+        "message"
+      ],
+      "additionalProperties": false,
+      "default": {
+        "type": "watching",
+        "message": "you"
+      },
+      "description": "The bot status message."
+    },
+    "printers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "The name of the printer."
+          },
+          "address": {
+            "type": "string",
+            "format": "uri",
+            "description": "The IP address or Hostname of the printer."
+          },
+          "apiKey": {
+            "type": "string",
+            "description": "The API key for the printer."
+          },
+          "hasWebcam": {
+            "type": "boolean",
+            "default": true,
+            "description": "Whether the printer has a webcam."
+          },
+          "make": {
+            "type": "string",
+            "description": "The make of the printer."
+          },
+          "model": {
+            "type": "string",
+            "description": "The model of the printer."
+          },
+          "color": {
+            "type": "string",
+            "description": "The color of the printer."
+          }
+        },
+        "required": [
+          "name",
+          "address",
+          "apiKey"
+        ],
+        "additionalProperties": false
+      },
+      "default": [],
+      "description": "List of printers."
     }
-  },
-  "required": []
+  }
 }
