@@ -14,7 +14,7 @@ export class ProfileMenu extends Menu {
 
   async run(interaction: UserContextMenuCommandInteraction<CacheType>) {
     await interaction.editReply({
-      content: `Profile menu for ${interaction.targetUser.username}`,
+      content: `You cliked the profile menu for ${interaction.targetUser.username}`,
     });
   }
 }
