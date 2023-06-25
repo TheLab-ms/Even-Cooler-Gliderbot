@@ -1,15 +1,12 @@
 import {
   AttachmentBuilder,
   AttachmentData,
-  ButtonBuilder,
-  ButtonStyle,
   CommandInteraction,
   EmbedBuilder,
 } from 'discord.js';
-import { Command } from '../lib/command';
-import printers from '../utils/printers';
-import { OctoprintError } from '../lib/octoprint/errors';
-import { ActionRowBuilder } from '@discordjs/builders';
+import printers from '../../utils/printers';
+import { OctoprintError } from '../../lib/octoprint/errors';
+import { Command } from '../../interfaces/Commands';
 
 export class Status extends Command {
   title = 'status';

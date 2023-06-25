@@ -10,7 +10,7 @@ import onMessage from './events/onMessage';
 import loadJobs from './helpers/loadJobs';
 import EventData from './interfaces/EventData.interface';
 import configSchema from './schemas/config';
-
+import loadMenus from './helpers/loadMenus';
 
 dotenv.config();
 const { DISCORD_TOKEN } = process.env;
@@ -22,9 +22,9 @@ const configInput = JSON.parse(fs.readFileSync(path.join(__dirname, '../config.j
     intents: ['Guilds', 'GuildMembers', 'GuildMessages', 'GuildMessageReactions', 'MessageContent'],
     partials: [Partials.Reaction],
   });
-  const [commands, jobs] = await Promise.all([loadCommands(), loadJobs()]);
+  const [commands, jobs, menus] = await Promise.all([loadCommands(), loadJobs(), loadMenus()]);
   const config = configSchema.parse(configInput);
-  const data: EventData = { commands, jobs, config };
+  const data: EventData = { commands, jobs, config, menus };
   bot.on('ready', () => onReady(bot, data));
   bot.on('interactionCreate', (interaction: Interaction) => {
     onInteractionCreate(interaction, data);

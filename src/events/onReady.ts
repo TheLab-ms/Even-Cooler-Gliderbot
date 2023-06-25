@@ -1,14 +1,41 @@
 import { REST } from '@discordjs/rest';
-import { Client, ActivityType, SlashCommandBuilder } from 'discord.js';
+import {
+  Client,
+  ActivityType,
+  SlashCommandBuilder,
+  ContextMenuCommandBuilder,
+  Collection,
+} from 'discord.js';
 import { Routes } from 'discord-api-types/v10';
 import { CronJob as Cron } from 'cron';
 import { JobCollection } from '../helpers/loadJobs';
 import { CommandCollection } from '../helpers/loadCommands';
 import EventData from '../interfaces/EventData.interface';
-import { Command } from '../lib/command';
+import { MenuCollection } from '../helpers/loadMenus';
+import { Command, Menu } from '../interfaces/Commands';
 
-async function setupCommands(bot: Client, commands: CommandCollection) {
-  const commandData = commands.map((command: Command) => {
+type GenericCommand = Command | Menu;
+type GenericCommandCollection = Collection<string, GenericCommand>;
+
+function isMenu(arg: GenericCommand) {
+  return (arg as Menu).type !== undefined;
+}
+
+async function setupCommands(bot: Client, commands: CommandCollection, menus: MenuCollection) {
+  // Add commands and menus here
+  const genericCommandCollection: GenericCommandCollection = new Collection();
+  commands.forEach((command) => genericCommandCollection.set(command.title, command));
+  menus.forEach((menu) => genericCommandCollection.set(menu.title, menu));
+  const commandData = genericCommandCollection.map((genericCommand: Command | Menu) => {
+    if (isMenu(genericCommand)) {
+      const menu = genericCommand as Menu;
+      return new ContextMenuCommandBuilder()
+        .setName(menu.title)
+        .setType(menu.type)
+        .setDMPermission(menu.availableInDMs)
+        .toJSON();
+    }
+    const command = genericCommand as Command;
     const builder = new SlashCommandBuilder()
       .setName(command.title)
       .setDescription(command.description);
@@ -57,10 +84,10 @@ async function setupCronJobs(bot: Client, jobs: JobCollection) {
 
 export default async (bot: Client, data: EventData) => {
   console.log('Bot is ready!');
-  const { commands, jobs } = data;
+  const { commands, jobs, menus } = data;
   bot.user?.setPresence({
     status: 'online',
     activities: [{ name: 'A Game Called Life', type: ActivityType.Playing }],
   });
-  await Promise.all([setupCommands(bot, commands), setupCronJobs(bot, jobs)]);
+  await Promise.all([setupCommands(bot, commands, menus), setupCronJobs(bot, jobs)]);
 };

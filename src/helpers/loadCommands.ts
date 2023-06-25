@@ -1,18 +1,18 @@
 import { Collection } from 'discord.js';
-import { Command } from '../lib/command';
-import { Status } from '../commands/status';
-import { Account } from '../commands/account';
+import { Status } from '../interactions/commands/status';
+import { Account } from '../interactions/commands/account';
+import { Command } from '../interfaces/Commands';
 
 export type CommandCollection = Collection<string, Command>;
 
-export default async function loadCommands(): Promise<Collection<string, Command>> {
+export default async function loadCommands(): Promise<CommandCollection> {
+  const allCommands = [new Status(), new Account()];
   const commands = new Collection<string, Command>();
 
-  const status = new Status();
-  const account = new Account();
-
   // Include all commands here
-  commands.set(status.title, status);
-  commands.set(account.title, account);
+  allCommands.forEach((command) => {
+    commands.set(command.title, command);
+  });
+
   return commands;
 }
