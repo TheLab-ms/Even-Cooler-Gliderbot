@@ -11,7 +11,7 @@ export default async function onInteractionCreate(
     if (!menu) return;
     try {
       await interaction.deferReply({ ephemeral: menu.isEphemeral });
-      await menu.run(interaction as UserContextMenuCommandInteraction<CacheType>);
+      await menu.run(interaction as UserContextMenuCommandInteraction<CacheType>, data);
     } catch (error) {
       console.error(error);
       await interaction.editReply({
@@ -26,7 +26,7 @@ export default async function onInteractionCreate(
     if (!command) return;
     try {
       await interaction.deferReply({ ephemeral: command.isEphemeral });
-      await command.run(interaction);
+      await command.run(interaction, data);
     } catch (error) {
       console.error(error);
       await interaction.editReply({

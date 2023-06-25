@@ -4,6 +4,7 @@ import {
   ApplicationCommandType,
   UserContextMenuCommandInteraction,
 } from 'discord.js';
+import EventData from './EventData.interface';
 
 interface OptionChoice {
   name: string;
@@ -30,11 +31,11 @@ export abstract class Command extends GenericCommand {
   description: string = '';
   options?: CommandOptions[];
 
-  abstract run(interaction: CommandInteraction): Promise<void>;
+  abstract run(interaction: CommandInteraction, data: EventData): Promise<void>;
 }
 
 export abstract class Menu extends GenericCommand {
   type: ContextMenuCommandType = ApplicationCommandType.User;
 
-  abstract run(interaction: UserContextMenuCommandInteraction): Promise<void>;
+  abstract run(interaction: UserContextMenuCommandInteraction, data: EventData): Promise<void>;
 }

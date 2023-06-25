@@ -111,6 +111,10 @@
       },
       "default": [],
       "description": "List of printers."
+    },
+    "forceKeycloakName": {
+      "type": "boolean",
+      "default": false
     }
   }
 }

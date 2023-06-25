@@ -16,7 +16,7 @@ export interface KeyCloakTokenResponse {
   scope: string;
 }
 
-export interface KeycloakUser {
+export interface KeycloakUserResponse {
   id: string;
   createdTimestamp: number;
   username: string;
@@ -40,4 +40,21 @@ export interface KeycloakUser {
     impersonate: boolean;
     manage: boolean;
   };
+}
+
+export interface KeycloakUser {
+  id: string;
+  createdTimestamp: number;
+  username: string;
+  enabled: boolean;
+  totp: boolean;
+  emailVerified: boolean;
+  firstName: string;
+  lastName: string;
+  email: string;
+  discordId?: string;
+  activeSubscriber?: string;
+  disableableCredentialTypes: string[];
+  requiredActions: string[];
+  notBefore: number;
 }
