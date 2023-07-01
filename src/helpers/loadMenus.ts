@@ -1,11 +1,11 @@
 import { Collection } from 'discord.js';
-import { ProfileMenu } from '../interactions/menus/profile';
+import { UpdateRoles } from '../interactions/menus/updateRoles';
 import { Menu } from '../interfaces/Commands';
 
 export type MenuCollection = Collection<string, Menu>;
 
 export default async function loadMenus(): Promise<MenuCollection> {
-  const allMenus = [new ProfileMenu()];
+  const allMenus = [new UpdateRoles()];
 
   const menus = new Collection<string, Menu>();
 
