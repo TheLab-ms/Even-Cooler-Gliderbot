@@ -1,7 +1,8 @@
 import dotenv from 'dotenv';
-dotenv.config();
 
 import configSchema from '../schemas/config';
+
+dotenv.config();
 
 export function loadConfig() {
   const decodedData = atob(process.env.CONFIG);
