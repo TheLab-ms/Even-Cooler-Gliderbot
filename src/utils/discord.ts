@@ -4,7 +4,7 @@ export async function giveMemberRoleViaInteraction(
   interaction: CommandInteraction,
   roleId: string,
 ): Promise<[boolean, string | undefined]> {
-  const guild = interaction.guild;
+  const { guild } = interaction;
   if (!guild) {
     return [false, 'Cannot find guild'];
   }
@@ -74,4 +74,3 @@ export async function giveMemberNickName(
   }
   return [true, undefined];
 }
-

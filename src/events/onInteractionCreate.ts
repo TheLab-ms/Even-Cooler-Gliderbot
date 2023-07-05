@@ -41,6 +41,5 @@ export default async function onInteractionCreate(
     await interaction.editReply({
       content: 'This button has not been implemented yet!',
     });
-    return;
   }
 }

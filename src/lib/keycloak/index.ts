@@ -4,8 +4,11 @@ import { KeyCloakConfig, KeyCloakTokenResponse, KeycloakUser, KeycloakUserRespon
 
 export class Keycloak {
   private url: string;
+
   private realm: string;
+
   private user: string;
+
   private password: string;
 
   constructor(keycloakConfig: KeyCloakConfig) {
@@ -63,32 +66,30 @@ export class Keycloak {
       path: `groups/${groupId}/members`,
     });
     const cleanedMembers = members
-      .map((member: KeycloakUserResponse) => {
-        return {
-          id: member.id,
-          createdTimestamp: member.createdTimestamp,
-          username: member.username,
-          enabled: member.enabled,
-          totp: member.totp,
-          emailVerified: member.emailVerified,
-          firstName: member.firstName,
-          lastName: member.lastName,
-          email: member.email,
-          discordId:
-            member.attributes && member.attributes.discordId && member.attributes.discordId[0]
-              ? member.attributes.discordId[0]
-              : undefined,
-          activeSubscriber:
-            member.attributes &&
-            member.attributes.activeSubscriber &&
-            member.attributes.activeSubscriber[0]
-              ? member.attributes.activeSubscriber[0]
-              : undefined,
-          disableableCredentialTypes: member.disableableCredentialTypes,
-          requiredActions: member.requiredActions,
-          notBefore: member.notBefore,
-        };
-      })
+      .map((member: KeycloakUserResponse) => ({
+        id: member.id,
+        createdTimestamp: member.createdTimestamp,
+        username: member.username,
+        enabled: member.enabled,
+        totp: member.totp,
+        emailVerified: member.emailVerified,
+        firstName: member.firstName,
+        lastName: member.lastName,
+        email: member.email,
+        discordId:
+          member.attributes && member.attributes.discordId && member.attributes.discordId[0]
+            ? member.attributes.discordId[0]
+            : undefined,
+        activeSubscriber:
+          member.attributes &&
+          member.attributes.activeSubscriber &&
+          member.attributes.activeSubscriber[0]
+            ? member.attributes.activeSubscriber[0]
+            : undefined,
+        disableableCredentialTypes: member.disableableCredentialTypes,
+        requiredActions: member.requiredActions,
+        notBefore: member.notBefore,
+      }))
       .filter((member) => member.discordId);
     return cleanedMembers;
   }

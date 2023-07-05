@@ -6,8 +6,11 @@ import EventData from '../../interfaces/EventData.interface';
 
 export class Status extends Command {
   title = 'status';
+
   description = 'Get the status of a printer';
+
   isEphemeral = true;
+
   options = [
     {
       name: 'printer',
@@ -20,6 +23,7 @@ export class Status extends Command {
       })),
     },
   ];
+
   async run(interaction: CommandInteraction) {
     if (
       !interaction.options ||

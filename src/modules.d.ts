@@ -12,6 +12,5 @@ declare namespace NodeJS {
     KEYCLOAK_MEMBERSHIP_GROUP: string;
     DISCORD_MEMBERSHIP_ROLE: string;
     DISCORD_LEADERSHIP_ROLE: string;
-    [key: string]: never;
   }
 }

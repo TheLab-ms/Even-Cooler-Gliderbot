@@ -5,10 +5,14 @@ import axios from 'axios';
 import { JobState, OctoprintConfig, PrinterStatus } from './types';
 import { OctoprintError } from './errors';
 import { debugLog } from '../../utils/debug';
+
 export class Octoprint {
   private url: string;
+
   private apiKey: string;
+
   public hasWebcam: boolean;
+
   public name: string;
 
   constructor(printerConfig: OctoprintConfig) {
@@ -17,6 +21,7 @@ export class Octoprint {
     this.hasWebcam = printerConfig.hasWebcam;
     this.name = printerConfig.name;
   }
+
   public async getPrinterState(): Promise<PrinterStatus> {
     const response = await this.httpRequest('/api/printer', 'GET');
     return response.data;

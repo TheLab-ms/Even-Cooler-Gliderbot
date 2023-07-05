@@ -11,8 +11,11 @@ import EventData from '../../interfaces/EventData.interface';
 
 export class UpdateRoles extends Menu {
   title = 'Update Roles';
+
   type = ApplicationCommandType.User as ContextMenuCommandType;
+
   isEphemeral = true;
+
   availableInDMs = false;
 
   async run(interaction: UserContextMenuCommandInteraction<CacheType>, data: EventData) {

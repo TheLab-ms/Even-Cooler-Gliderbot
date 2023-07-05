@@ -1,5 +1,5 @@
 import dotenv from 'dotenv';
-import { Client, Interaction, Message, Partials } from 'discord.js';
+import { Client, Interaction, Message, Partials, GuildMember } from 'discord.js';
 
 import onReady from './events/onReady';
 import loadCommands from './helpers/loadCommands';
@@ -8,7 +8,7 @@ import onMessage from './events/onMessage';
 import loadJobs from './helpers/loadJobs';
 import EventData from './interfaces/EventData.interface';
 import loadMenus from './helpers/loadMenus';
-import { GuildMember } from 'discord.js';
+
 import onJoin from './events/onJoin';
 import { Keycloak } from './lib/keycloak';
 import config from './utils/config';
