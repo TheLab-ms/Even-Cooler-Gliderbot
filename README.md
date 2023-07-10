@@ -1,6 +1,6 @@
-# [WIP] Glider Bot
+Glider Bot
 
-The un-offical Discord Bot for TheLab.ms 
+The official Discord Bot for TheLab.ms 
 
 ## Setup
 ### Prerequisites
@@ -23,26 +23,4 @@ npm install
 
 ```bash 
 npm run config
-```
-
-4. (Optional) Start the docker-compose file to start a dummy octoprint server
-
-```bash
-docker-compose up -d
-```
-
-1. Edit the .env and config.json files
-    - Configure your Discord Bot Token, Client ID & Guild ID in the .env file
-    - (Optional) Configure your printer settings in the printerconfig.json file
-  
-2. Run the config command to set the printer config
-
-```bash
-npm run config
-```
-
-7. Start the bot
-
-```bash
-npm run start
 ```
