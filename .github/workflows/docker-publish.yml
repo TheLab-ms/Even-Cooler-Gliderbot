@@ -87,9 +87,14 @@ jobs:
         # against the sigstore community Fulcio instance.
         run: echo "${{ steps.meta.outputs.tags }}" | xargs -I {} cosign sign {}@${{ steps.build-and-push.outputs.digest }}
       
-      # Clone the other repository
-      - name: Clone GitOps repository
-        run: git clone https://github.com/TheLab-ms/gitops.git
+      # Checkout the other repository
+      - name: Checkout TheLab-ms/gitops repository
+        uses: actions/checkout@v3
+        with:
+          repository: TheLab-ms/gitops
+          ref: main
+          path: gitops
+          token: ${{ secrets.ACCESS_TOKEN }}
 
       # Update the TOML file
       - name: Update TOML file
