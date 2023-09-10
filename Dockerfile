@@ -1,13 +1,11 @@
-FROM node:lts-alpine
+FROM oven/bun
 
 WORKDIR /usr
-COPY package*.json ./
+COPY package.json ./
+COPY bun.lockb ./
 COPY tsconfig.json ./
 COPY src ./src
 
-RUN npm ci
-RUN npm run build
+RUN bun install
 
-RUN npm i -g pm2
-
-CMD ["pm2-runtime", "start", "dist/index.js"]
+CMD ["bun", "run", "start"]
