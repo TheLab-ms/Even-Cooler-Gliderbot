@@ -109,7 +109,8 @@ jobs:
           cd gitops
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
-          git checkout -b update-gliderbot-image
+          UNIQUE_BRANCH_NAME=update-gliderbot-image-$(date +%Y%m%d%H%M%S)
+          git checkout -b $UNIQUE_BRANCH_NAME
           git add -A
           git commit -m "Update Gliderbot image"
           git push origin update-gliderbot-image
