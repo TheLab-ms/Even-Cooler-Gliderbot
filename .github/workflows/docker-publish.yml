@@ -103,18 +103,6 @@ jobs:
           awk -v new_image="$NEW_IMAGE" 'BEGIN {OFS=FS} /^image =/ {$0=new_image} {print}' gitops/containers/gliderbot/gliderbot.toml > gitops/containers/gliderbot/gliderbot.toml.tmp
           mv gitops/containers/gliderbot/gliderbot.toml.tmp gitops/containers/gliderbot/gliderbot.toml
 
-      # Install GitHub CLI
-      - name: Install GitHub CLI
-        run: |
-          sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-key C99B11DEB97541F0
-          sudo apt-add-repository https://cli.github.com/packages
-          sudo apt update
-          sudo apt install gh
-
-      # Configure GitHub CLI
-      - name: Configure GitHub CLI
-        run: gh auth login --with-token ${{ secrets.ACCESS_TOKEN }}
-
       # Create a new branch and commit changes
       - name: Create a new branch and commit changes
         run: |
@@ -131,3 +119,5 @@ jobs:
         run: |
           cd gitops
           gh pr create --base main --head update-gliderbot-image --title "Update Gliderbot image" --body "Automated PR to update the Gliderbot image."
+        env:
+          GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
