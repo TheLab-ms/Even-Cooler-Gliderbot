@@ -6,12 +6,7 @@ name: Publish Docker Image
 # documentation.
 
 on:
-  push:
-    branches: [ "main" ]
-    # Publish semver tags as releases.
-    tags: [ 'v*.*.*' ]
-  pull_request:
-    branches: [ "main" ]
+  workflow_dispatch:
 
 env:
   # Use docker.io for Docker Hub if empty
@@ -22,7 +17,6 @@ env:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -92,3 +86,25 @@ jobs:
         # This step uses the identity token to provision an ephemeral certificate
         # against the sigstore community Fulcio instance.
         run: echo "${{ steps.meta.outputs.tags }}" | xargs -I {} cosign sign {}@${{ steps.build-and-push.outputs.digest }}
+      
+      # Clone the other repository
+      - name: Clone GitOps repository
+        run: git clone https://github.com/TheLab-ms/gitops.git
+
+      # Update the TOML file
+      - name: Update TOML file
+        run: |
+          NEW_IMAGE="image = \"ghcr.io/thelab-ms/gliderbot@${{ steps.build-and-push.outputs.digest }}\""
+          sed -i "1s/.*/$NEW_IMAGE/" gitops/containers/gliderbot/gliderbot.toml
+
+      # Commit and create a pull request
+      - name: Commit changes and create a pull request
+        run: |
+          cd gitops
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "github-actions[bot]"
+          git checkout -b update-gliderbot-image
+          git add containers/gliderbot/gliderbot.toml
+          git commit -m "Update Gliderbot image"
+          git push origin update-gliderbot-image
+          gh pr create --base main --head update-gliderbot-image --title "Update Gliderbot image" --body "Automated update of Gliderbot image."
