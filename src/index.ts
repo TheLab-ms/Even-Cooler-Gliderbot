@@ -1,4 +1,3 @@
-import dotenv from 'dotenv';
 import { Client, Interaction, Message, Partials, GuildMember } from 'discord.js';
 
 import onReady from './events/onReady';
@@ -13,7 +12,7 @@ import onJoin from './events/onJoin';
 import { Keycloak } from './lib/keycloak';
 import config from './utils/config';
 
-dotenv.config();
+
 const { DISCORD_TOKEN } = process.env;
 
 const keycloakClient = new Keycloak({
@@ -23,18 +22,16 @@ const keycloakClient = new Keycloak({
   password: process.env.KEYCLOAK_PASSWORD || '',
 });
 
-(async () => {
-  const bot = new Client({
-    intents: ['Guilds', 'GuildMembers', 'GuildMessages', 'GuildMessageReactions', 'MessageContent'],
-    partials: [Partials.Reaction],
-  });
-  const [commands, jobs, menus] = await Promise.all([loadCommands(), loadJobs(), loadMenus()]);
-  const data: EventData = { commands, jobs, config, menus, keycloakClient };
-  bot.on('ready', () => onReady(bot, data));
-  bot.on('interactionCreate', (interaction: Interaction) => {
-    onInteractionCreate(interaction, data);
-  });
-  bot.on('messageCreate', (message: Message) => onMessage(message, data));
-  bot.on('guildMemberAdd', (member: GuildMember) => onJoin(bot, member, data));
-  bot.login(DISCORD_TOKEN);
-})();
+const bot = new Client({
+  intents: ['Guilds', 'GuildMembers', 'GuildMessages', 'GuildMessageReactions', 'MessageContent'],
+  partials: [Partials.Reaction],
+});
+const [commands, jobs, menus] = await Promise.all([loadCommands(), loadJobs(), loadMenus()]);
+const data: EventData = { commands, jobs, config, menus, keycloakClient };
+bot.on('ready', () => onReady(bot, data));
+bot.on('interactionCreate', (interaction: Interaction) => {
+  onInteractionCreate(interaction, data);
+});
+bot.on('messageCreate', (message: Message) => onMessage(message, data));
+bot.on('guildMemberAdd', (member: GuildMember) => onJoin(bot, member, data));
+bot.login(DISCORD_TOKEN);
