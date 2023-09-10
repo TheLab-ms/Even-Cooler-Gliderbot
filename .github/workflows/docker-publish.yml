@@ -99,8 +99,9 @@ jobs:
       # Update the TOML file
       - name: Update TOML file
         run: |
-          NEW_IMAGE="image = \"ghcr.io/thelab-ms/gliderbot@${{ steps.build-and-push.outputs.digest }}\""
-          sed -i "1s/.*/$NEW_IMAGE/" gitops/containers/gliderbot/gliderbot.toml
+          NEW_IMAGE="image = \\\"ghcr.io/thelab-ms/gliderbot@${{ steps.build-and-push.outputs.digest }}\\\""
+          awk -v new_image="$NEW_IMAGE" 'BEGIN {OFS=FS} /^image =/ {$0=new_image} {print}' gitops/containers/gliderbot/gliderbot.toml > gitops/containers/gliderbot/gliderbot.toml.tmp
+          mv gitops/containers/gliderbot/gliderbot.toml.tmp gitops/containers/gliderbot/gliderbot.toml
 
       # Commit and create a pull request
       - name: Commit changes and create a pull request
