@@ -121,4 +121,4 @@ jobs:
           cd gitops
           gh pr create --base main --head update-gliderbot-image --title "Update Gliderbot image" --body "Automated PR to update the Gliderbot image."
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
