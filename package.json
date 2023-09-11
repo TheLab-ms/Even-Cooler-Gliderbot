@@ -7,7 +7,7 @@
     "build": "bun build",
     "start": "bun src/index.ts",
     "lint": "eslint . --ext .ts --config .eslintrc",
-    "config": "bun ./scripts/config.ts"
+    "config": "bun ./src/scripts/config.ts"
   },
   "repository": {
     "type": "git",
@@ -27,12 +27,10 @@
     "@discordjs/builders": "^1.6.3",
     "@discordjs/rest": "^1.7.1",
     "@types/node": "^20.6.0",
-    "axios": "^1.5.0",
     "cron": "^2.2.0",
     "discord-api-types": "^0.37.56",
     "discord.js": "14.11.0",
     "qs": "^6.11.2",
-    "zlib-sync": "^0.1.8",
     "zod": "^3.20.6"
   },
   "devDependencies": {
