@@ -113,7 +113,7 @@ jobs:
           git checkout -b $UNIQUE_BRANCH_NAME
           git add -A
           git commit -m "Update Gliderbot image"
-          git push origin update-gliderbot-image
+          git push origin $UNIQUE_BRANCH_NAME
 
       # Create Pull Request
       - name: Create Pull Request
