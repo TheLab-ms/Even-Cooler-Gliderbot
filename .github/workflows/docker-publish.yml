@@ -6,12 +6,7 @@ name: Publish Docker Image
 # documentation.
 
 on:
-  push:
-    branches: [ "main" ]
-    # Publish semver tags as releases.
-    tags: [ 'v*.*.*' ]
-  pull_request:
-    branches: [ "main" ]
+  workflow_dispatch:
 
 env:
   # Use docker.io for Docker Hub if empty
@@ -19,10 +14,8 @@ env:
   # github.repository as <account>/<repo>
   IMAGE_NAME: ${{ github.repository }}
 
-
 jobs:
   build:
-
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -42,7 +35,6 @@ jobs:
         uses: sigstore/cosign-installer@f3c664df7af409cb4873aa5068053ba9d61a57b6 #v2.6.0
         with:
           cosign-release: 'v1.13.1'
-
 
       # Workaround: https://github.com/docker/build-push-action/issues/461
       - name: Setup Docker buildx
@@ -79,7 +71,6 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-
       # Sign the resulting Docker image digest except on PRs.
       # This will only write to the public Rekor transparency log when the Docker
       # repository is public to avoid leaking data.  If you would like to publish
@@ -88,7 +79,38 @@ jobs:
       - name: Sign the published Docker image
         if: ${{ github.event_name != 'pull_request' }}
         env:
-          COSIGN_EXPERIMENTAL: "true"
+          COSIGN_EXPERIMENTAL: 'true'
         # This step uses the identity token to provision an ephemeral certificate
         # against the sigstore community Fulcio instance.
         run: echo "${{ steps.meta.outputs.tags }}" | xargs -I {} cosign sign {}@${{ steps.build-and-push.outputs.digest }}
+
+      # Checkout the other repository
+      - name: Checkout TheLab-ms/gitops repository
+        uses: actions/checkout@v3
+        with:
+          repository: TheLab-ms/gitops
+          ref: main
+          path: gitops
+          token: ${{ secrets.ACCESS_TOKEN }}
+
+      # Update the TOML file
+      - name: Update TOML file
+        run: |
+          NEW_IMAGE="image = \\\"ghcr.io/thelab-ms/gliderbot@${{ steps.build-and-push.outputs.digest }}\\\""
+          awk -v new_image="$NEW_IMAGE" 'BEGIN {OFS=FS} /^image =/ {$0=new_image} {print}' gitops/containers/gliderbot/gliderbot.toml > gitops/containers/gliderbot/gliderbot.toml.tmp
+          mv gitops/containers/gliderbot/gliderbot.toml.tmp gitops/containers/gliderbot/gliderbot.toml
+
+      # Create a new branch and commit changes
+      - name: Create a new branch and commit changes, then PR
+        run: |
+          cd gitops
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          UNIQUE_BRANCH_NAME=update-gliderbot-image-$(date +%Y%m%d%H%M%S)
+          git checkout -b $UNIQUE_BRANCH_NAME
+          git add -A
+          git commit -m "Update Gliderbot image"
+          git push origin $UNIQUE_BRANCH_NAME
+          gh pr create --base main --head  $UNIQUE_BRANCH_NAME --title "Update Gliderbot image" --body "Automated PR to update the Gliderbot image."
+        env:
+          GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
