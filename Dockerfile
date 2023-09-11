@@ -1,16 +1,13 @@
-FROM oven/bun
-
-# We need curl for a hack
-RUN apt update
-RUN apt install -y curl
+FROM node:lts-alpine
 
 WORKDIR /usr
-
-COPY package.json ./
-COPY bun.lockb ./
+COPY package*.json ./
 COPY tsconfig.json ./
 COPY src ./src
 
-RUN bun install
+RUN npm ci
+RUN npm run build
 
-CMD ["bun", "run", "start"]
+RUN npm i -g pm2
+
+CMD ["pm2-runtime", "start", "dist/index.js"]

@@ -1,3 +1,7 @@
+import fs from 'fs';
+import path from 'path';
+
+import axios from 'axios';
 import { JobState, OctoprintConfig, PrinterStatus } from './types';
 import { OctoprintError } from './errors';
 import { debugLog } from '../../utils/debug';
@@ -18,55 +22,58 @@ export class Octoprint {
     this.name = printerConfig.name;
   }
 
-  public getPrinterState(): Promise<PrinterStatus> {
-    return this.httpRequest('/api/printer', 'GET');
+  public async getPrinterState(): Promise<PrinterStatus> {
+    const response = await this.httpRequest('/api/printer', 'GET');
+    return response.data;
   }
 
-  public getJobState(): Promise<JobState> {
-    return this.httpRequest('/api/job', 'GET');
+  public async getJobState(): Promise<JobState> {
+    const response = await this.httpRequest('/api/job', 'GET');
+    return response.data;
   }
 
   public async getSnapshot(): Promise<Buffer> {
+    if (!this.hasWebcam) {
+      const fallbackImage = await fs.promises.readFile(
+        path.join(__dirname, '../../images/fallback.jpg'),
+      );
+      return fallbackImage;
+    }
     try {
-      // Bun hack - For some reason octet streams are broken in Bun
-      const proc = Bun.spawn(["curl", "-s", `${this.url}/webcam/?action=snapshot`]);
-      const image = await new Response(proc.stdout);
-      return Buffer.from(await image.arrayBuffer());
-    } catch (e) {
-      const fallbackImage = Bun.file('src/images/fallback.jpg');
-      return Buffer.from(await fallbackImage.arrayBuffer());
+      const response = await this.httpRequest('/webcam/?action=snapshot', 'GET', {
+        responseType: 'arraybuffer',
+      });
+      return Buffer.from(response.data, 'utf-8');
+    } catch (error) {
+      const fallbackImage = await fs.promises.readFile(
+        path.join(__dirname, '../../images/fallback.jpg'),
+      );
+      return fallbackImage;
     }
   }
 
   private async httpRequest(
     path: string,
-    method: 'GET' | 'POST'
+    method: 'GET' | 'POST',
+    options?: {
+      responseType?: 'json' | 'arraybuffer';
+    },
   ): Promise<any> {
     try {
-      const response = await fetch(`${this.url}${path}`, {
+      return await axios(`${this.url}${path}`, {
         method,
         headers: {
           'X-Api-Key': this.apiKey,
         },
+        ...options,
       });
-
-      if (!response.ok) {
-        console.log("Not ok")
-        const errorData = await response.json();
-        throw new OctoprintError(
-          response.status,
-          errorData?.error ?? 'Unknown error'
-        );
-      }
-
-      return await response.json();
     } catch (error) {
-      if (error instanceof OctoprintError) {
+      if (axios.isAxiosError(error)) {
         debugLog(error);
-        throw error;
-      } else {
-        debugLog(error);
-        throw new OctoprintError(500, 'Unknown error');
+        throw new OctoprintError(
+          error.status ?? 500,
+          error.response?.data?.error ?? 'Unknown error',
+        );
       }
     }
   }
