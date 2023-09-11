@@ -113,11 +113,9 @@ export class Status extends Command {
       });
     } catch (error) {
       if (error instanceof OctoprintError) {
-
         await interaction.editReply(`Error: ${error.message}`);
         return;
       }
-      console.log(error)
       await interaction.editReply(`An unknown error occurred`);
     }
   }

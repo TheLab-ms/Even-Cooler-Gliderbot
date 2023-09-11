@@ -19,21 +19,17 @@ export class Keycloak {
   }
 
   private async makeRequest<T>(config: {
-    method: 'GET' | 'POST' | 'PUT' | 'DELETE';
+    method: 'get' | 'post' | 'put' | 'delete';
     path: string;
   }): Promise<T> {
-    const response = await fetch(`${this.url}/admin/realms/${this.realm}/${config.path}`, {
+    const response: AxiosResponse<T> = await axios.request({
       method: config.method,
+      url: `${this.url}/admin/realms/${this.realm}/${config.path}`,
       headers: {
-        'Authorization': `Bearer ${await this.getToken()}`,
+        Authorization: `Bearer ${await this.getToken()}`,
       },
     });
-
-    if (!response.ok) {
-      throw new Error(`Failed to fetch: ${response.statusText}`);
-    }
-
-    return await response.json();
+    return response.data;
   }
 
   public async getToken(): Promise<string> {
@@ -44,32 +40,29 @@ export class Keycloak {
       password: this.password,
     });
 
-    const response = await fetch(`${this.url}/realms/${this.realm}/protocol/openid-connect/token`, {
-      method: 'POST',
+    const config = {
+      method: 'post',
+      maxBodyLength: Infinity,
+      url: `${this.url}/realms/${this.realm}/protocol/openid-connect/token`,
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
       },
-      body: credentials,
-    });
-
-    if (!response.ok) {
-      throw new Error(`Failed to fetch token: ${response.statusText}`);
-    }
-
-    const data: KeyCloakTokenResponse = await response.json();
-    return data.access_token;
+      data: credentials,
+    };
+    const response: AxiosResponse<KeyCloakTokenResponse> = await axios.request(config);
+    return response.data.access_token;
   }
 
   getUsers(): Promise<KeycloakUserResponse[]> {
     return this.makeRequest<KeycloakUserResponse[]>({
-      method: 'GET',
+      method: 'get',
       path: `users`,
     });
   }
 
   async getGroupMembers(groupId: string): Promise<KeycloakUser[]> {
     const members = await this.makeRequest<KeycloakUserResponse[]>({
-      method: 'GET',
+      method: 'get',
       path: `groups/${groupId}/members`,
     });
     const cleanedMembers = members
@@ -89,8 +82,8 @@ export class Keycloak {
             : undefined,
         activeSubscriber:
           member.attributes &&
-            member.attributes.activeSubscriber &&
-            member.attributes.activeSubscriber[0]
+          member.attributes.activeSubscriber &&
+          member.attributes.activeSubscriber[0]
             ? member.attributes.activeSubscriber[0]
             : undefined,
         disableableCredentialTypes: member.disableableCredentialTypes,
