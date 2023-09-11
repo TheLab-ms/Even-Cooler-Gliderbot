@@ -104,7 +104,7 @@ jobs:
           mv gitops/containers/gliderbot/gliderbot.toml.tmp gitops/containers/gliderbot/gliderbot.toml
 
       # Create a new branch and commit changes
-      - name: Create a new branch and commit changes
+      - name: Create a new branch and commit changes, then PR
         run: |
           cd gitops
           git config user.name "GitHub Actions"
@@ -114,11 +114,6 @@ jobs:
           git add -A
           git commit -m "Update Gliderbot image"
           git push origin $UNIQUE_BRANCH_NAME
-
-      # Create Pull Request
-      - name: Create Pull Request
-        run: |
-          cd gitops
-          gh pr create --base main --head update-gliderbot-image --title "Update Gliderbot image" --body "Automated PR to update the Gliderbot image."
+          gh pr create --base main --head  $UNIQUE_BRANCH_NAME --title "Update Gliderbot image" --body "Automated PR to update the Gliderbot image."
         env:
           GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
