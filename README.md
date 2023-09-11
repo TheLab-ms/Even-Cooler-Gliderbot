@@ -2,9 +2,10 @@ Glider Bot
 
 The official Discord Bot for TheLab.ms 
 
+Now powered by Bun
 ## Setup
 ### Prerequisites
-- Node.js 18.0.0 or higher
+- Bun 1.0.0 [Get it Here](https://bun.sh)
 
 ### Installation
 1. Clone the repository
@@ -16,11 +17,18 @@ git clone ...
 2. Install dependencies
 
 ```bash
-npm install
+bun install
 ```
 
 3. Run the config command
 
 ```bash 
-npm run config
+bun run config
+```
+
+4. Edit the config.json file and .env
+5. Run the config command again
+6. Run it
+```bash
+bun run start
 ```
