@@ -1,4 +1,3 @@
-import axios, { AxiosResponse } from 'axios';
 import qs from 'qs';
 import { KeyCloakConfig, KeyCloakTokenResponse, KeycloakUser, KeycloakUserResponse } from './types';
 
@@ -44,17 +43,20 @@ export class Keycloak {
       password: this.password,
     });
 
-    const config = {
-      method: 'post',
-      maxBodyLength: Infinity,
-      url: `${this.url}/realms/${this.realm}/protocol/openid-connect/token`,
+    const response = await fetch(`${this.url}/realms/${this.realm}/protocol/openid-connect/token`, {
+      method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
       },
-      data: credentials,
-    };
-    const response: AxiosResponse<KeyCloakTokenResponse> = await axios.request(config);
-    return response.data.access_token;
+      body: credentials,
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch token: ${response.statusText}`);
+    }
+
+    const data: KeyCloakTokenResponse = await response.json();
+    return data.access_token;
   }
 
   getUsers(): Promise<KeycloakUserResponse[]> {
