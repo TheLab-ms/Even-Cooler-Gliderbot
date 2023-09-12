@@ -19,17 +19,21 @@ export class Keycloak {
   }
 
   private async makeRequest<T>(config: {
-    method: 'get' | 'post' | 'put' | 'delete';
+    method: 'GET' | 'POST' | 'PUT' | 'DELETE';
     path: string;
   }): Promise<T> {
-    const response: AxiosResponse<T> = await axios.request({
+    const response = await fetch(`${this.url}/admin/realms/${this.realm}/${config.path}`, {
       method: config.method,
-      url: `${this.url}/admin/realms/${this.realm}/${config.path}`,
       headers: {
         Authorization: `Bearer ${await this.getToken()}`,
       },
     });
-    return response.data;
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch: ${response.statusText}`);
+    }
+
+    return await response.json();
   }
 
   public async getToken(): Promise<string> {
@@ -55,14 +59,14 @@ export class Keycloak {
 
   getUsers(): Promise<KeycloakUserResponse[]> {
     return this.makeRequest<KeycloakUserResponse[]>({
-      method: 'get',
+      method: 'GET',
       path: `users`,
     });
   }
 
   async getGroupMembers(groupId: string): Promise<KeycloakUser[]> {
     const members = await this.makeRequest<KeycloakUserResponse[]>({
-      method: 'get',
+      method: 'GET',
       path: `groups/${groupId}/members`,
     });
     const cleanedMembers = members

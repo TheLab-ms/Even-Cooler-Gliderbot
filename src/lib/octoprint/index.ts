@@ -1,7 +1,6 @@
 import fs from 'fs';
 import path from 'path';
 
-import axios from 'axios';
 import { JobState, OctoprintConfig, PrinterStatus } from './types';
 import { OctoprintError } from './errors';
 import { debugLog } from '../../utils/debug';
@@ -23,13 +22,11 @@ export class Octoprint {
   }
 
   public async getPrinterState(): Promise<PrinterStatus> {
-    const response = await this.httpRequest('/api/printer', 'GET');
-    return response.data;
+    return this.httpRequest('/api/printer', 'GET');
   }
 
   public async getJobState(): Promise<JobState> {
-    const response = await this.httpRequest('/api/job', 'GET');
-    return response.data;
+    return this.httpRequest('/api/job', 'GET');
   }
 
   public async getSnapshot(): Promise<Buffer> {
@@ -43,7 +40,7 @@ export class Octoprint {
       const response = await this.httpRequest('/webcam/?action=snapshot', 'GET', {
         responseType: 'arraybuffer',
       });
-      return Buffer.from(response.data, 'utf-8');
+      return Buffer.from(response, 'utf-8');
     } catch (error) {
       const fallbackImage = await fs.promises.readFile(
         path.join(__dirname, '../../images/fallback.jpg'),
@@ -60,20 +57,30 @@ export class Octoprint {
     },
   ): Promise<any> {
     try {
-      return await axios(`${this.url}${path}`, {
+      const response: Response = await fetch(`${this.url}${path}`, {
         method,
         headers: {
           'X-Api-Key': this.apiKey,
         },
-        ...options,
       });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new OctoprintError(response.status, errorData?.error ?? 'Unknown error');
+      }
+
+      if (options?.responseType === 'arraybuffer') {
+        return await response.arrayBuffer();
+      } else {
+        return await response.json();
+      }
     } catch (error) {
-      if (axios.isAxiosError(error)) {
+      if (error instanceof OctoprintError) {
         debugLog(error);
-        throw new OctoprintError(
-          error.status ?? 500,
-          error.response?.data?.error ?? 'Unknown error',
-        );
+        throw error;
+      } else {
+        debugLog(error);
+        throw new OctoprintError(500, 'Unknown error');
       }
     }
   }
