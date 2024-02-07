@@ -10,7 +10,7 @@ export default async function syncRoles(
 ): Promise<string> {
   const foundMember = await data.keycloakClient.lookupDiscordUserInGroup(
     memberId,
-    process.env.KEYCLOAK_MEMBERSHIP_GROUP,
+    process.env.KEYCLOAK_MEMBERSHIP_GROUP as string,
   );
   if (!foundMember) {
     return 'User is not a member';
@@ -19,7 +19,7 @@ export default async function syncRoles(
     client,
     memberId,
     guildId,
-    process.env.DISCORD_MEMBERSHIP_ROLE,
+    process.env.DISCORD_MEMBERSHIP_ROLE as string,
   );
 
   try {
@@ -38,7 +38,7 @@ export default async function syncRoles(
 
   const foundLeader = await data.keycloakClient.lookupDiscordUserInGroup(
     memberId,
-    process.env.KEYCLOAK_LEADERSHIP_GROUP,
+    process.env.KEYCLOAK_LEADERSHIP_GROUP as string,
   );
 
   if (!foundLeader) {
@@ -49,7 +49,7 @@ export default async function syncRoles(
     client,
     memberId,
     guildId,
-    process.env.DISCORD_LEADERSHIP_ROLE,
+    process.env.DISCORD_LEADERSHIP_ROLE as string,
   );
 
   if (!successAddedLeadership) {

@@ -1,4 +1,5 @@
 import dotenv from 'dotenv';
+dotenv.config();
 import { Client, Interaction, Message, Partials, GuildMember } from 'discord.js';
 
 import onReady from './events/onReady';
@@ -13,7 +14,6 @@ import onJoin from './events/onJoin';
 import { Keycloak } from './lib/keycloak';
 import config from './utils/config';
 
-dotenv.config();
 const { DISCORD_TOKEN } = process.env;
 
 const keycloakClient = new Keycloak({

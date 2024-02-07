@@ -27,7 +27,7 @@ export class ProfileMenu extends Menu {
     const { keycloakClient } = data;
     const user = await keycloakClient.lookupDiscordUserInGroup(
       interaction.targetUser.id,
-      process.env.KEYCLOAK_MEMBERSHIP_GROUP,
+      process.env.KEYCLOAK_MEMBERSHIP_GROUP as string,
     );
     if (!user) {
       await interaction.editReply({
