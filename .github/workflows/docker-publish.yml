@@ -6,6 +6,9 @@ name: Publish Docker Image
 # documentation.
 
 on:
+  push:
+    branches:
+      - 'main'
   workflow_dispatch:
 
 env:
@@ -84,33 +87,17 @@ jobs:
         # against the sigstore community Fulcio instance.
         run: echo "${{ steps.meta.outputs.tags }}" | xargs -I {} cosign sign {}@${{ steps.build-and-push.outputs.digest }}
 
-      # # Checkout the other repository
-      # - name: Checkout TheLab-ms/gitops repository
-      #   uses: actions/checkout@v3
-      #   with:
-      #     repository: TheLab-ms/gitops
-      #     ref: main
-      #     path: gitops
-      #     token: ${{ secrets.ACCESS_TOKEN }}
-
-      # # Update the TOML file
-      # - name: Update TOML file
-      #   run: |
-      #     NEW_IMAGE="image = \\\"ghcr.io/thelab-ms/gliderbot@${{ steps.build-and-push.outputs.digest }}\\\""
-      #     awk -v new_image="$NEW_IMAGE" 'BEGIN {OFS=FS} /^image =/ {$0=new_image} {print}' gitops/containers/gliderbot/gliderbot.toml > gitops/containers/gliderbot/gliderbot.toml.tmp
-      #     mv gitops/containers/gliderbot/gliderbot.toml.tmp gitops/containers/gliderbot/gliderbot.toml
-
-      # # Create a new branch and commit changes
-      # - name: Create a new branch and commit changes, then PR
-      #   run: |
-      #     cd gitops
-      #     git config user.name "GitHub Actions"
-      #     git config user.email "actions@github.com"
-      #     UNIQUE_BRANCH_NAME=update-gliderbot-image-$(date +%Y%m%d%H%M%S)
-      #     git checkout -b $UNIQUE_BRANCH_NAME
-      #     git add -A
-      #     git commit -m "Update Gliderbot image"
-      #     git push origin $UNIQUE_BRANCH_NAME
-      #     gh pr create --base main --head  $UNIQUE_BRANCH_NAME --title "Update Gliderbot image" --body "Automated PR to update the Gliderbot image."
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    needs: build
+    container:
+      image: docker.io/bitnami/kubectl:1.29.0
+    steps:
+      - name: 'Patch Image'
+        run: |
+          echo $KUBE_CONFIG | base64 -d > kc.yaml
+          kubectl --kubeconfig kc.yaml set image deployment/gliderbot svc=$NEW_IMAGE
+        env:
+          KUBE_CONFIG: ${{ secrets.KUBECONFIG }}
+          NEW_IMAGE: ${{ needs.push.outputs.tag }}
