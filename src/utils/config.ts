@@ -1,11 +1,8 @@
-import dotenv from 'dotenv';
-
 import configSchema from '../schemas/config';
-
-dotenv.config();
+import env from './env';
 
 export function loadConfig() {
-  const decodedData = atob(process.env.CONFIG);
+  const decodedData = atob(env.CONFIG as string);
   return configSchema.parse(JSON.parse(decodedData || '{}'));
 }
 

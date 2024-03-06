@@ -1,122 +1,81 @@
-import { AttachmentBuilder, AttachmentData, CommandInteraction, EmbedBuilder } from 'discord.js';
-import printers from '../../utils/printers';
-import { OctoprintError } from '../../lib/octoprint/errors';
+import {
+  AttachmentBuilder,
+  ColorResolvable,
+  CommandInteraction,
+  EmbedBuilder,
+} from 'discord.js';
+import tools from '../../utils/tools';
 import { Command } from '../../interfaces/Commands';
-import EventData from '../../interfaces/EventData.interface';
+import thumbnails from '../../constants/thumbnails';
+import { Printer } from '../../interfaces/Printer';
 
 export class Status extends Command {
   title = 'status';
-
-  description = 'Get the status of a printer';
-
+  description = 'Get the status of a tool';
   isEphemeral = true;
-
-  options = [
-    {
-      name: 'printer',
-      description: 'The printer to check the status of',
-      type: 'STRING',
-      required: true,
-      choices: Object.keys(printers).map((printer, index) => ({
-        name: printer,
-        value: printer,
-      })),
-    },
-  ];
+  options = [{
+    name: 'tool',
+    description: 'The tool to check the status of',
+    type: 'STRING',
+    required: true,
+    choices: Object.keys(tools).map(tool => ({ name: tool, value: tool })),
+  }];
 
   async run(interaction: CommandInteraction) {
-    if (
-      !interaction.options ||
-      !interaction.options.get('printer') ||
-      interaction.options.get('printer') === null
-    ) {
+    const toolOption = interaction.options.get('tool');
+    if (!toolOption?.value) return;
+
+    const tool = tools[toolOption.value as string];
+    if (!tool) {
+      await interaction.editReply("Tool not found");
       return;
     }
-    const option = interaction.options.get('printer');
-    const printerIndex = option?.value as string;
-    const printer = printers[printerIndex];
 
     try {
-      const [printerState, jobState, snapshotBuffer] = await Promise.all([
-        printer.getPrinterState(),
-        printer.getJobState(),
-        printer.getSnapshot(),
-      ]);
-      const imageData: AttachmentData = {
-        name: `snapshot.jpg`,
-      };
-      const snapshot = new AttachmentBuilder(snapshotBuffer, imageData);
-      const embedFiles = [];
-      const embed = new EmbedBuilder()
-        .setTitle('Printer Status')
-        .addFields([
-          {
-            name: 'Printer State',
-            value: printerState.state.text,
-            inline: true,
-          },
-        ])
-        .setTimestamp();
-
-      // If the printer has a webcam or we have a snapshot buffer, add the image to the embed
-      if (printer.hasWebcam || snapshotBuffer !== null) {
-        embed.setImage(`attachment://${imageData.name}`);
-        embedFiles.push(snapshot);
-      } else {
-        embed.addFields([
-          {
-            name: 'Webcam',
-            value: 'No webcam configured',
-          },
-        ]);
-      }
-
-      if (printerState.state.text === 'Printing') {
-        const jobEndingTimestamp = (
-          (Date.now() + jobState.progress.printTimeLeft * 1000) /
-          1000
-        ).toFixed(0);
-        embed.addFields([
-          {
-            name: 'Job Name',
-            value: jobState.job.file.name,
-            inline: true,
-          },
-          {
-            name: 'Job Progress',
-            value: `${jobState.progress.completion.toFixed(2)}%`,
-            inline: true,
-          },
-          {
-            name: 'Estimated Time Remaining',
-            value: `<t:${jobEndingTimestamp}:R>`,
-          },
-        ]);
-      }
-
-      // const confirm = new ButtonBuilder()
-      //   .setCustomId('confirm')
-      //   .setLabel('Confirm Ban')
-      //   .setStyle(ButtonStyle.Danger);
-
-      // const cancel = new ButtonBuilder()
-      //   .setCustomId('cancel')
-      //   .setLabel('Cancel')
-      //   .setStyle(ButtonStyle.Secondary);
-
-      // const row = new ActionRowBuilder<ButtonBuilder>().addComponents(cancel, confirm);
-
-      await interaction.editReply({
-        embeds: [embed],
-        files: embedFiles,
-        // components: [row],
-      });
+      const embed = await this.buildToolStatusEmbed(tool);
+      await interaction.editReply({ embeds: [embed.embed], files: embed.files });
     } catch (error) {
-      if (error instanceof OctoprintError) {
-        await interaction.editReply(`Error: ${error.message}`);
-        return;
-      }
-      await interaction.editReply(`An unknown error occurred`);
+      await interaction.editReply("Tool is offline");
+    }
+  }
+
+  private async getToolData(tool: any) {
+    const statusPromise = tool.getStatus();
+    const snapshotPromise = tool.getToolInfo().hasWebcam ? tool.getSnapshot() : Promise.resolve(null);
+    return Promise.all([statusPromise, snapshotPromise]);
+  }
+
+  private async buildToolStatusEmbed(tool: any) {
+    const [toolState, snapshotBuffer] = await this.getToolData(tool);
+    const toolInfo = tool.getToolInfo();
+    const embed = new EmbedBuilder()
+      .setTitle(toolInfo.name)
+      .setColor(toolInfo.color as ColorResolvable)
+      .addFields([{ name: 'Tool Availability', value: toolState.isAvailable ? 'Available' : 'In Use', inline: true }])
+      .setTimestamp();
+
+    this.setThumbnail(embed, toolInfo);
+    this.setSnapshot(embed, snapshotBuffer);
+    await this.setRemainingTimeField(embed, tool, toolState);
+
+    return { embed: embed, files: snapshotBuffer ? [new AttachmentBuilder(snapshotBuffer, { name: 'snapshot.jpg' })] : [] };
+  }
+
+  private setThumbnail(embed: EmbedBuilder, toolInfo: any) {
+    const toolThumbnail = thumbnails[`${toolInfo.make} ${toolInfo.model}`];
+    if (toolThumbnail) embed.setThumbnail(toolThumbnail);
+  }
+
+  private setSnapshot(embed: EmbedBuilder, snapshotBuffer: Buffer | null) {
+    if (snapshotBuffer) embed.setImage('attachment://snapshot.jpg');
+    else embed.addFields([{ name: 'Webcam', value: 'No webcam configured' }]);
+  }
+
+  private async setRemainingTimeField(embed: EmbedBuilder, tool: any, toolState: any) {
+    if (tool.getToolInfo().hasRemainingTime && tool.getType() === '3D Printer' && !toolState.isAvailable) {
+      const remainingTime = await (tool as Printer).getRemainingTime();
+      const finishTime = Math.floor(Date.now() / 1000) + remainingTime;
+      embed.addFields([{ name: 'Finish At', value: `<t:${finishTime}:t>` }]);
     }
   }
 }

@@ -5,7 +5,7 @@ import { JobState, OctoprintConfig, PrinterStatus } from './types';
 import { OctoprintError } from './errors';
 import { debugLog } from '../../utils/debug';
 
-export class Octoprint {
+export default class Octoprint {
   private url: string;
 
   private apiKey: string;

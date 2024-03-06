@@ -21,19 +21,14 @@ interface CommandOptions {
 
 export abstract class GenericCommand {
   title: string = '';
-
   isEphemeral: boolean = true;
-
   allowedRoles?: string[] = [];
-
   disallowedRoles?: string[] = [];
-
   availableInDMs: boolean = false;
 }
 
 export abstract class Command extends GenericCommand {
   description: string = '';
-
   options?: CommandOptions[];
 
   abstract run(interaction: CommandInteraction, data: EventData): Promise<void>;

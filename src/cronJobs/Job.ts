@@ -9,3 +9,4 @@ const Job: CronJob = {
 };
 
 export default Job;
+export { Job };

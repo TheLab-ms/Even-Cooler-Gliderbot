@@ -1,6 +1,7 @@
 import { Client, GuildMember } from 'discord.js';
 import { giveMemberRole, giveMemberNickName } from '../../utils/discord';
 import EventData from '../../interfaces/EventData.interface';
+import env from '../../utils/env';
 
 export default async function syncRoles(
   client: Client,
@@ -10,7 +11,7 @@ export default async function syncRoles(
 ): Promise<string> {
   const foundMember = await data.keycloakClient.lookupDiscordUserInGroup(
     memberId,
-    process.env.KEYCLOAK_MEMBERSHIP_GROUP,
+    env.KEYCLOAK_MEMBERSHIP_GROUP as string,
   );
   if (!foundMember) {
     return 'User is not a member';
@@ -19,7 +20,7 @@ export default async function syncRoles(
     client,
     memberId,
     guildId,
-    process.env.DISCORD_MEMBERSHIP_ROLE,
+    env.DISCORD_MEMBERSHIP_ROLE as string,
   );
 
   try {
@@ -35,10 +36,12 @@ export default async function syncRoles(
     console.error(`Failed to add membership role to ${memberId}`);
     return 'Failed to add membership role';
   }
-
+  if (!env.KEYCLOAK_LEADERSHIP_GROUP || !env.DISCORD_LEADERSHIP_ROLE) {
+    return 'Leadership system is not setup';
+  }
   const foundLeader = await data.keycloakClient.lookupDiscordUserInGroup(
     memberId,
-    process.env.KEYCLOAK_LEADERSHIP_GROUP,
+    env.KEYCLOAK_LEADERSHIP_GROUP,
   );
 
   if (!foundLeader) {
@@ -49,7 +52,7 @@ export default async function syncRoles(
     client,
     memberId,
     guildId,
-    process.env.DISCORD_LEADERSHIP_ROLE,
+    env.DISCORD_LEADERSHIP_ROLE,
   );
 
   if (!successAddedLeadership) {

@@ -1,4 +1,3 @@
-import dotenv from 'dotenv';
 import { Client, Interaction, Message, Partials, GuildMember } from 'discord.js';
 
 import onReady from './events/onReady';
@@ -12,15 +11,15 @@ import loadMenus from './helpers/loadMenus';
 import onJoin from './events/onJoin';
 import { Keycloak } from './lib/keycloak';
 import config from './utils/config';
+import env from './utils/env';
 
-dotenv.config();
-const { DISCORD_TOKEN } = process.env;
+const { DISCORD_TOKEN } = env;
 
 const keycloakClient = new Keycloak({
-  url: process.env.KEYCLOAK_URL || '',
-  realm: process.env.KEYCLOAK_REALM || '',
-  user: process.env.KEYCLOAK_USER || '',
-  password: process.env.KEYCLOAK_PASSWORD || '',
+  url: env.KEYCLOAK_URL || '',
+  realm: env.KEYCLOAK_REALM || '',
+  user: env.KEYCLOAK_USER || '',
+  password: env.KEYCLOAK_PASSWORD || '',
 });
 
 (async () => {

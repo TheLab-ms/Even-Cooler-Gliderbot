@@ -1,8 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://thelab.ms/schema/config.json",
-  "title": "TheLab.ms Config Schema",
-  "description": "TheLab.ms Config Schema",
+  "id": "https://thelab.ms/schema/config.json",
+  "title": "TheLab.ms Config",
   "type": "object",
   "properties": {
     "autoResponse": {
@@ -66,55 +65,257 @@
       },
       "description": "The bot status message."
     },
-    "printers": {
+    "tools": {
       "type": "array",
       "items": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string",
-            "description": "The name of the printer."
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "description": "The name of the tool."
+              },
+              "make": {
+                "type": "string",
+                "description": "The make of the tool."
+              },
+              "model": {
+                "type": "string",
+                "description": "The model of the tool."
+              },
+              "type": {
+                "type": "string",
+                "const": "3D Printer",
+                "description": "The type of the tool."
+              },
+              "color": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "enum": [
+                      "Default",
+                      "Aqua",
+                      "DarkAqua",
+                      "Green",
+                      "DarkGreen",
+                      "Blue",
+                      "DarkBlue",
+                      "Purple",
+                      "DarkPurple",
+                      "LuminousVividPink",
+                      "DarkVividPink",
+                      "Gold",
+                      "DarkGold",
+                      "Orange",
+                      "DarkOrange",
+                      "Red",
+                      "DarkRed",
+                      "Grey",
+                      "DarkGrey",
+                      "DarkerGrey",
+                      "LightGrey",
+                      "Navy",
+                      "DarkNavy",
+                      "Yellow",
+                      "White",
+                      "Greyple",
+                      "Black",
+                      "DarkButNotBlack",
+                      "NotQuiteBlack",
+                      "Blurple",
+                      "Green",
+                      "Yellow",
+                      "Fuchsia",
+                      "Red"
+                    ]
+                  },
+                  {
+                    "type": "string",
+                    "pattern": "^\\#"
+                  }
+                ],
+                "description": "The color of the tool."
+              },
+              "hasWebcam": {
+                "type": "boolean",
+                "default": false,
+                "description": "Whether the tool has a webcam."
+              },
+              "adapter": {
+                "type": "string",
+                "enum": [
+                  "octoprint",
+                  "prusa-link",
+                  "bambu",
+                  "home-assistant"
+                ],
+                "description": "The adapter for the tool."
+              },
+              "hasRemainingTime": {
+                "type": "boolean",
+                "default": true,
+                "description": "Whether the tool has remaining time sensor."
+              },
+              "address": {
+                "type": "string",
+                "format": "uri",
+                "description": "The IP address or Hostname of the printer."
+              },
+              "apiKey": {
+                "type": "string",
+                "description": "The API key for the printer."
+              }
+            },
+            "required": [
+              "name",
+              "make",
+              "model",
+              "type",
+              "color",
+              "adapter",
+              "address",
+              "apiKey"
+            ],
+            "additionalProperties": false
           },
-          "address": {
-            "type": "string",
-            "format": "uri",
-            "description": "The IP address or Hostname of the printer."
+          {
+            "type": "object",
+            "properties": {
+              "name": {
+                "$ref": "#/properties/tools/items/anyOf/0/properties/name"
+              },
+              "make": {
+                "type": "string",
+                "const": "Bambu Labs",
+                "description": "The make of the tool."
+              },
+              "model": {
+                "type": "string",
+                "description": "The model of the tool."
+              },
+              "type": {
+                "type": "string",
+                "const": "3D Printer",
+                "description": "The type of the tool."
+              },
+              "color": {
+                "$ref": "#/properties/tools/items/anyOf/0/properties/color"
+              },
+              "hasWebcam": {
+                "$ref": "#/properties/tools/items/anyOf/0/properties/hasWebcam"
+              },
+              "adapter": {
+                "$ref": "#/properties/tools/items/anyOf/0/properties/adapter"
+              },
+              "hasRemainingTime": {
+                "type": "boolean",
+                "default": true,
+                "description": "Whether the tool has remaining time sensor."
+              },
+              "homeAssistantEntity": {
+                "type": "string",
+                "pattern": "^sensor\\.",
+                "description": "The entity id of the printer in Home Assistant. Example: sensor.ender_3_pro_print_state"
+              },
+              "homeAssistantCameraEntity": {
+                "type": "string",
+                "description": "The entity id of the camera in Home Assistant."
+              },
+              "homeAssistantFinishTimeEntity": {
+                "type": "string",
+                "description": "The entity id of the remaining time."
+              }
+            },
+            "required": [
+              "name",
+              "make",
+              "model",
+              "type",
+              "color",
+              "adapter",
+              "homeAssistantEntity"
+            ],
+            "additionalProperties": false
           },
-          "apiKey": {
-            "type": "string",
-            "description": "The API key for the printer."
-          },
-          "hasWebcam": {
-            "type": "boolean",
-            "default": true,
-            "description": "Whether the printer has a webcam."
-          },
-          "make": {
-            "type": "string",
-            "description": "The make of the printer."
-          },
-          "model": {
-            "type": "string",
-            "description": "The model of the printer."
-          },
-          "color": {
-            "type": "string",
-            "description": "The color of the printer."
+          {
+            "type": "object",
+            "properties": {
+              "name": {
+                "$ref": "#/properties/tools/items/anyOf/0/properties/name"
+              },
+              "make": {
+                "type": "string",
+                "const": "Prusa",
+                "description": "The make of the tool."
+              },
+              "model": {
+                "type": "string",
+                "enum": [
+                  "i3 MK2.5",
+                  "i3 MK2.5S",
+                  "i3 MK3",
+                  "i3 MK3S",
+                  "i3 MK3S+",
+                  "MK3.5",
+                  "MK3.9",
+                  "MK4",
+                  "Mini",
+                  "Mini+",
+                  "XL"
+                ],
+                "description": "The model of the tool."
+              },
+              "type": {
+                "type": "string",
+                "const": "3D Printer",
+                "description": "The type of the tool."
+              },
+              "color": {
+                "$ref": "#/properties/tools/items/anyOf/0/properties/color"
+              },
+              "hasWebcam": {
+                "$ref": "#/properties/tools/items/anyOf/0/properties/hasWebcam"
+              },
+              "adapter": {
+                "$ref": "#/properties/tools/items/anyOf/0/properties/adapter"
+              },
+              "hasRemainingTime": {
+                "type": "boolean",
+                "default": true,
+                "description": "Whether the tool has remaining time sensor."
+              },
+              "address": {
+                "type": "string",
+                "format": "uri",
+                "description": "The IP address or Hostname of the printer."
+              },
+              "apiKey": {
+                "type": "string",
+                "description": "The API key for the printer."
+              }
+            },
+            "required": [
+              "name",
+              "make",
+              "model",
+              "type",
+              "color",
+              "adapter",
+              "address",
+              "apiKey"
+            ],
+            "additionalProperties": false
           }
-        },
-        "required": [
-          "name",
-          "address",
-          "apiKey"
-        ],
-        "additionalProperties": false
+        ]
       },
       "default": [],
-      "description": "List of printers."
+      "description": "List of tools."
     },
     "forceKeycloakName": {
       "type": "boolean",
       "default": false
     }
-  }
+  },
+  "additionalProperties": false
 }

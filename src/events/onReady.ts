@@ -13,6 +13,7 @@ import { CommandCollection } from '../helpers/loadCommands';
 import EventData from '../interfaces/EventData.interface';
 import { MenuCollection } from '../helpers/loadMenus';
 import { Command, Menu } from '../interfaces/Commands';
+import env from '../utils/env';
 
 type GenericCommand = Command | Menu;
 type GenericCommandCollection = Collection<string, GenericCommand>;
@@ -61,9 +62,9 @@ async function setupCommands(bot: Client, commands: CommandCollection, menus: Me
     }
     return builder.toJSON();
   });
-  const rest = new REST({ version: '9' }).setToken(process.env.DISCORD_TOKEN as string);
+  const rest = new REST({ version: '9' }).setToken(env.DISCORD_TOKEN as string);
   await rest.put(
-    Routes.applicationGuildCommands(bot.user?.id || 'missing id', process.env.GUILD_ID),
+    Routes.applicationGuildCommands(bot.user?.id || 'missing id', env.GUILD_ID as string),
     { body: commandData },
   );
 }
