@@ -1,5 +1,7 @@
+import env from "./env";
+
 export function debugLog(...props: any[]) {
-  if (process.env.NODE_ENV === 'development') {
+  if (env.NODE_ENV === 'DEV') {
     console.log(...props);
   }
 }

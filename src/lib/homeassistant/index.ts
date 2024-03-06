@@ -1,10 +1,11 @@
+import env from '../../utils/env';
 import { CameraState, EntityState } from './types';
 
 export default class HomeAssistant {
   public url: string;
   private apiKey: string;
 
-  constructor(url = process.env.HOMEASSISTANT_URL, apiKey = process.env.HOMEASSISTANT_API_TOKEN) {
+  constructor(url = env.HOMEASSISTANT_URL, apiKey = env.HOMEASSISTANT_API_TOKEN) {
     this.url = url;
     this.apiKey = apiKey;
   }

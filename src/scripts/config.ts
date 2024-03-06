@@ -1,6 +1,4 @@
 import { existsSync } from 'node:fs';
-import { config } from 'dotenv';
-config();
 import { writeFile, readFile, copyFile } from 'node:fs/promises';
 import configSchema from '../schemas/config';
 

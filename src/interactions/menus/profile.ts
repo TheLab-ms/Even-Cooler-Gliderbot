@@ -7,6 +7,7 @@ import {
 import { Menu } from '../../interfaces/Commands';
 import EventData from '../../interfaces/EventData.interface';
 import { EmbedBuilder } from '@discordjs/builders';
+import env from '../../utils/env';
 
 export class ProfileMenu extends Menu {
   title = 'Profile';
@@ -27,7 +28,7 @@ export class ProfileMenu extends Menu {
     const { keycloakClient } = data;
     const user = await keycloakClient.lookupDiscordUserInGroup(
       interaction.targetUser.id,
-      process.env.KEYCLOAK_MEMBERSHIP_GROUP as string,
+      env.KEYCLOAK_MEMBERSHIP_GROUP as string,
     );
     if (!user) {
       await interaction.editReply({

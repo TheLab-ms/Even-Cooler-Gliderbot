@@ -3,17 +3,25 @@ import { CommandInteraction } from 'discord.js';
 import { giveMemberNickName, giveMemberRoleViaInteraction } from '../../utils/discord';
 import { Command } from '../../interfaces/Commands';
 import EventData from '../../interfaces/EventData.interface';
+import env from '../../utils/env';
+
+const { KEYCLOAK_LEADERSHIP_GROUP, KEYCLOAK_MEMBERSHIP_GROUP, DISCORD_MEMBERSHIP_ROLE, DISCORD_LEADERSHIP_ROLE } = env;
 
 export class Account extends Command {
   title = 'account';
   description = 'Sync your membership status';
   isEphemeral = true;
   options = [];
+
   async run(interaction: CommandInteraction, data: EventData) {
+    if (!KEYCLOAK_LEADERSHIP_GROUP || !KEYCLOAK_MEMBERSHIP_GROUP || !DISCORD_MEMBERSHIP_ROLE || !DISCORD_LEADERSHIP_ROLE) {
+      return;
+    }
+
     const { keycloakClient } = data;
     const member = await keycloakClient.lookupDiscordUserInGroup(
       interaction.user.id,
-      process.env.KEYCLOAK_MEMBERSHIP_GROUP,
+      KEYCLOAK_MEMBERSHIP_GROUP,
     );
     if (!member) {
       await interaction.editReply({
@@ -23,7 +31,7 @@ export class Account extends Command {
     }
     const [addedMemberRole] = await giveMemberRoleViaInteraction(
       interaction,
-      process.env.DISCORD_MEMBERSHIP_ROLE,
+      DISCORD_MEMBERSHIP_ROLE,
     );
     try {
       if (data.config.forceKeycloakName) {
@@ -47,7 +55,7 @@ export class Account extends Command {
 
     const leadership = await keycloakClient.lookupDiscordUserInGroup(
       interaction.user.id,
-      process.env.KEYCLOAK_LEADERSHIP_GROUP,
+      KEYCLOAK_LEADERSHIP_GROUP,
     );
     if (!leadership) {
       await interaction.editReply({
@@ -57,7 +65,7 @@ export class Account extends Command {
     }
     const [addedLeadershipRole] = await giveMemberRoleViaInteraction(
       interaction,
-      process.env.DISCORD_LEADERSHIP_ROLE,
+      DISCORD_LEADERSHIP_ROLE,
     );
     if (!addedLeadershipRole) {
       await interaction.editReply({
