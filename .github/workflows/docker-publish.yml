@@ -54,10 +54,10 @@ jobs:
     container:
       image: docker.io/bitnami/kubectl:1.29.0
     steps:
-      - name: "Patch Image"
+      - name: 'Patch Image'
         run: |
           echo $KUBE_CONFIG | base64 -d > kc.yaml
-          kubectl --kubeconfig kc.yaml set image deployment/gliderbot svc=$NEW_IMAGE
+          kubectl --kubeconfig kc.yaml set image deployment/gliderbot gliderbot=$NEW_IMAGE
         env:
           KUBE_CONFIG: ${{ secrets.KUBECONFIG }}
           NEW_IMAGE: ${{ needs.push.outputs.tag }}
